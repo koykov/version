@@ -11,8 +11,8 @@ import (
 
 type Compact64 uint64
 
-// NewCompact composes version from given parts.
-func NewCompact(major, minor, patch, revision uint16) Compact64 {
+// NewCompact64 composes version from given parts.
+func NewCompact64(major, minor, patch, revision uint16) Compact64 {
 	var v Compact64
 	v = v | Compact64(major)<<48
 	v = v | Compact64(minor)<<32
@@ -21,13 +21,13 @@ func NewCompact(major, minor, patch, revision uint16) Compact64 {
 	return v
 }
 
-// ParseCompact makes new version from source.
-func ParseCompact(ver []byte) Compact64 {
-	return ParseCompactFromString(byteconv.B2S(ver))
+// ParseCompact64 makes new version from source.
+func ParseCompact64(ver []byte) Compact64 {
+	return ParseCompact64FromString(byteconv.B2S(ver))
 }
 
-// ParseCompactFromString makes new version from source string.
-func ParseCompactFromString(ver string) Compact64 {
+// ParseCompact64FromString makes new version from source string.
+func ParseCompact64FromString(ver string) Compact64 {
 	var m, n, p, r uint16
 	c := 0
 	for {
@@ -65,7 +65,7 @@ func ParseCompactFromString(ver string) Compact64 {
 	case 3:
 		r = uint16(u)
 	}
-	return NewCompact(m, n, p, r)
+	return NewCompact64(m, n, p, r)
 }
 
 func (v *Compact64) SetMajor(value uint16) *Compact64 {
