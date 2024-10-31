@@ -118,13 +118,17 @@ func (v *Compact64) Revision() uint16 {
 	return uint16(*v)
 }
 
+func (v *Compact64) Bytes() []byte {
+	return byteconv.S2B(v.String())
+}
+
 func (v *Compact64) String() string {
 	var a [23]byte
-	buf := a[:]
+	buf := a[:][:0]
 	m, n, p, r := v.Major(), v.Minor(), v.Patch(), v.Revision()
 	switch {
 	case r > 0:
-		buf = strconv.AppendUint(buf[:0], uint64(m), 10)
+		buf = strconv.AppendUint(buf, uint64(m), 10)
 		buf = append(buf, '.')
 		buf = strconv.AppendUint(buf, uint64(n), 10)
 		buf = append(buf, '.')
@@ -146,8 +150,31 @@ func (v *Compact64) String() string {
 }
 
 func (v *Compact64) WriteBinaryTo(w io.Writer) (int64, error) {
-	var buf [8]byte
-	binary.LittleEndian.PutUint64(buf[:], uint64(*v))
-	n, err := w.Write(buf[:])
+	p, _ := v.MarshalBinary()
+	n, err := w.Write(p)
 	return int64(n), err
 }
+
+func (v *Compact64) MarshalBinary() ([]byte, error) {
+	var buf [8]byte
+	binary.LittleEndian.PutUint64(buf[:], uint64(*v))
+	return buf[:], nil
+}
+
+func (v *Compact64) MarshalText() ([]byte, error) {
+	return v.Bytes(), nil
+}
+
+func (v *Compact64) UnmarshalBinary(bin []byte) error {
+	if len(bin) < 8 {
+		return ErrBinLen8
+	}
+	*v = Compact64(binary.LittleEndian.Uint64(bin))
+	return nil
+}
+
+func (v *Compact64) UnmarshalText(p []byte) error {
+	return v.Parse(p)
+}
+
+var _, _ = ParseCompact64, NewCompact64
