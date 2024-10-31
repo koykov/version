@@ -11,6 +11,17 @@ import (
 
 type Compact64 uint64
 
+// ParseCompact64 makes new version from source.
+func ParseCompact64(ver []byte) (Compact64, error) {
+	return ParseCompact64String(byteconv.B2S(ver))
+}
+
+// ParseCompact64String makes new version from source string.
+func ParseCompact64String(ver string) (v Compact64, err error) {
+	err = v.ParseString(ver)
+	return
+}
+
 // NewCompact64 composes version from given parts.
 func NewCompact64(major, minor, patch, revision uint16) Compact64 {
 	var v Compact64
@@ -21,13 +32,11 @@ func NewCompact64(major, minor, patch, revision uint16) Compact64 {
 	return v
 }
 
-// ParseCompact64 makes new version from source.
-func ParseCompact64(ver []byte) Compact64 {
-	return ParseCompact64FromString(byteconv.B2S(ver))
+func (v *Compact64) Parse(ver []byte) error {
+	return v.ParseString(byteconv.B2S(ver))
 }
 
-// ParseCompact64FromString makes new version from source string.
-func ParseCompact64FromString(ver string) Compact64 {
+func (v *Compact64) ParseString(ver string) error {
 	var m, n, p, r uint16
 	c := 0
 	for {
@@ -38,7 +47,7 @@ func ParseCompact64FromString(ver string) Compact64 {
 		raw := ver[:i]
 		u, err := strconv.ParseUint(raw, 10, 64)
 		if err != nil {
-			return 0
+			return err
 		}
 		switch c {
 		case 0:
@@ -53,7 +62,7 @@ func ParseCompact64FromString(ver string) Compact64 {
 	}
 	u, err := strconv.ParseUint(ver, 10, 64)
 	if err != nil {
-		return 0
+		return err
 	}
 	switch c {
 	case 0:
@@ -65,7 +74,8 @@ func ParseCompact64FromString(ver string) Compact64 {
 	case 3:
 		r = uint16(u)
 	}
-	return NewCompact64(m, n, p, r)
+	v.SetMajor(m).SetMinor(n).SetPatch(p).SetRevision(r)
+	return nil
 }
 
 func (v *Compact64) SetMajor(value uint16) *Compact64 {
