@@ -37,6 +37,10 @@ func (v *Compact64) Parse(ver []byte) error {
 }
 
 func (v *Compact64) ParseString(ver string) error {
+	if len(ver) == 0 {
+		return ErrEmpty
+	}
+
 	var m, n, p, r uint16
 	c := 0
 	for {
