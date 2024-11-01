@@ -17,4 +17,5 @@ type Version interface {
 	ParseString(ver string) error
 	WriteBinaryTo(w io.Writer) (int64, error)
 	Bytes() []byte
+	AppendBytes(dst []byte) []byte
 }

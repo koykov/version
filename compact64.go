@@ -118,35 +118,44 @@ func (v *Compact64) Revision() uint16 {
 	return uint16(*v)
 }
 
-func (v *Compact64) Bytes() []byte {
-	return byteconv.S2B(v.String())
-}
-
-func (v *Compact64) String() string {
-	var a [23]byte
-	buf := a[:][:0]
+func (v *Compact64) AppendBytes(dst []byte) []byte {
 	m, n, p, r := v.Major(), v.Minor(), v.Patch(), v.Revision()
 	switch {
 	case r > 0:
-		buf = strconv.AppendUint(buf, uint64(m), 10)
-		buf = append(buf, '.')
-		buf = strconv.AppendUint(buf, uint64(n), 10)
-		buf = append(buf, '.')
-		buf = strconv.AppendUint(buf, uint64(p), 10)
-		buf = append(buf, '.')
-		buf = strconv.AppendUint(buf, uint64(r), 10)
+		dst = strconv.AppendUint(dst, uint64(m), 10)
+		dst = append(dst, '.')
+		dst = strconv.AppendUint(dst, uint64(n), 10)
+		dst = append(dst, '.')
+		dst = strconv.AppendUint(dst, uint64(p), 10)
+		dst = append(dst, '.')
+		dst = strconv.AppendUint(dst, uint64(r), 10)
 	case r == 0 && p > 0:
-		buf = strconv.AppendUint(buf[:0], uint64(m), 10)
-		buf = append(buf, '.')
-		buf = strconv.AppendUint(buf, uint64(n), 10)
-		buf = append(buf, '.')
-		buf = strconv.AppendUint(buf, uint64(p), 10)
+		dst = strconv.AppendUint(dst[:0], uint64(m), 10)
+		dst = append(dst, '.')
+		dst = strconv.AppendUint(dst, uint64(n), 10)
+		dst = append(dst, '.')
+		dst = strconv.AppendUint(dst, uint64(p), 10)
 	case r == 0 && p == 0:
-		buf = strconv.AppendUint(buf[:0], uint64(m), 10)
-		buf = append(buf, '.')
-		buf = strconv.AppendUint(buf, uint64(n), 10)
+		dst = strconv.AppendUint(dst[:0], uint64(m), 10)
+		dst = append(dst, '.')
+		dst = strconv.AppendUint(dst, uint64(n), 10)
 	}
-	return byteconv.B2S(buf)
+	return dst
+}
+
+func (v *Compact64) Bytes() (r []byte) {
+	var buf [24]byte
+	r = v.AppendBytes(buf[:])
+	return
+}
+
+func (v *Compact64) String() string {
+	return byteconv.B2S(v.Bytes())
+}
+
+func (v *Compact64) WriteTo(w io.Writer) (int64, error) {
+	// todo implement me
+	return 0, nil
 }
 
 func (v *Compact64) WriteBinaryTo(w io.Writer) (int64, error) {
