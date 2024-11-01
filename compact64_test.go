@@ -31,12 +31,52 @@ func TestCompact64Parse(t *testing.T) {
 	}
 }
 
+func TestCompact64Marshal(t *testing.T) {
+	for _, c := range tcs64 {
+		if len(c.raw) < 3 {
+			continue
+		}
+		t.Run(c.raw, func(t *testing.T) {
+			var ver Compact64
+			ver.SetMajor(c.m).
+				SetMinor(c.n).
+				SetPatch(c.p).
+				SetRevision(c.r)
+			s := ver.String()
+			if s != c.raw {
+				t.Log(s)
+				t.FailNow()
+			}
+		})
+	}
+}
+
 func BenchmarkCompact64Parse(b *testing.B) {
 	for _, c := range tcs64 {
 		b.Run(c.raw, func(b *testing.B) {
 			b.ReportAllocs()
 			for i := 0; i < b.N; i++ {
 				_, _ = ParseCompact64String(c.raw)
+			}
+		})
+	}
+}
+
+func BenchmarkCompact64Marshal(b *testing.B) {
+	for _, c := range tcs64 {
+		if len(c.raw) < 3 {
+			continue
+		}
+		b.Run(c.raw, func(b *testing.B) {
+			b.ReportAllocs()
+			var buf []byte
+			for i := 0; i < b.N; i++ {
+				var ver Compact64
+				ver.SetMajor(c.m).
+					SetMinor(c.n).
+					SetPatch(c.p).
+					SetRevision(c.r)
+				buf = ver.AppendBytes(buf[:0])
 			}
 		})
 	}

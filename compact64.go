@@ -154,8 +154,8 @@ func (v *Compact64) String() string {
 }
 
 func (v *Compact64) WriteTo(w io.Writer) (int64, error) {
-	// todo implement me
-	return 0, nil
+	n, err := w.Write(v.Bytes())
+	return int64(n), err
 }
 
 func (v *Compact64) WriteBinaryTo(w io.Writer) (int64, error) {
