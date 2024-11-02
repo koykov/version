@@ -37,7 +37,7 @@ func TestCompact64Marshal(t *testing.T) {
 			continue
 		}
 		t.Run(c.raw, func(t *testing.T) {
-			var ver Compact64
+			var ver Version64
 			ver.SetMajor(c.m).
 				SetMinor(c.n).
 				SetPatch(c.p).
@@ -71,7 +71,7 @@ func BenchmarkCompact64Marshal(b *testing.B) {
 			b.ReportAllocs()
 			var buf []byte
 			for i := 0; i < b.N; i++ {
-				var ver Compact64
+				var ver Version64
 				ver.SetMajor(c.m).
 					SetMinor(c.n).
 					SetPatch(c.p).

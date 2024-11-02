@@ -9,35 +9,35 @@ import (
 	"github.com/koykov/byteconv"
 )
 
-// Compact64 represents simple version based on uint64 type.
-type Compact64 uint64
+// Version64 represents simple version based on uint64 type.
+type Version64 uint64
 
 // ParseCompact64 makes new version from source.
-func ParseCompact64(ver []byte) (Compact64, error) {
+func ParseCompact64(ver []byte) (Version64, error) {
 	return ParseCompact64String(byteconv.B2S(ver))
 }
 
 // ParseCompact64String makes new version from source string.
-func ParseCompact64String(ver string) (v Compact64, err error) {
+func ParseCompact64String(ver string) (v Version64, err error) {
 	err = v.ParseString(ver)
 	return
 }
 
 // NewCompact64 composes version from given parts.
-func NewCompact64(major, minor, patch, revision uint16) Compact64 {
-	var v Compact64
-	v = v | Compact64(major)<<48
-	v = v | Compact64(minor)<<32
-	v = v | Compact64(patch)<<16
-	v = v | Compact64(revision)
+func NewCompact64(major, minor, patch, revision uint16) Version64 {
+	var v Version64
+	v = v | Version64(major)<<48
+	v = v | Version64(minor)<<32
+	v = v | Version64(patch)<<16
+	v = v | Version64(revision)
 	return v
 }
 
-func (v *Compact64) Parse(ver []byte) error {
+func (v *Version64) Parse(ver []byte) error {
 	return v.ParseString(byteconv.B2S(ver))
 }
 
-func (v *Compact64) ParseString(ver string) error {
+func (v *Version64) ParseString(ver string) error {
 	if len(ver) == 0 {
 		return ErrEmpty
 	}
@@ -83,43 +83,43 @@ func (v *Compact64) ParseString(ver string) error {
 	return nil
 }
 
-func (v *Compact64) SetMajor(value uint16) *Compact64 {
-	*v = *v | Compact64(value)<<48
+func (v *Version64) SetMajor(value uint16) *Version64 {
+	*v = *v | Version64(value)<<48
 	return v
 }
 
-func (v *Compact64) SetMinor(value uint16) *Compact64 {
-	*v = *v | Compact64(value)<<32
+func (v *Version64) SetMinor(value uint16) *Version64 {
+	*v = *v | Version64(value)<<32
 	return v
 }
 
-func (v *Compact64) SetPatch(value uint16) *Compact64 {
-	*v = *v | Compact64(value)<<16
+func (v *Version64) SetPatch(value uint16) *Version64 {
+	*v = *v | Version64(value)<<16
 	return v
 }
 
-func (v *Compact64) SetRevision(value uint16) *Compact64 {
-	*v = *v | Compact64(value)
+func (v *Version64) SetRevision(value uint16) *Version64 {
+	*v = *v | Version64(value)
 	return v
 }
 
-func (v *Compact64) Major() uint16 {
+func (v *Version64) Major() uint16 {
 	return uint16(*v >> 48)
 }
 
-func (v *Compact64) Minor() uint16 {
+func (v *Version64) Minor() uint16 {
 	return uint16(*v >> 32)
 }
 
-func (v *Compact64) Patch() uint16 {
+func (v *Version64) Patch() uint16 {
 	return uint16(*v >> 16)
 }
 
-func (v *Compact64) Revision() uint16 {
+func (v *Version64) Revision() uint16 {
 	return uint16(*v)
 }
 
-func (v *Compact64) AppendBytes(dst []byte) []byte {
+func (v *Version64) AppendBytes(dst []byte) []byte {
 	m, n, p, r := v.Major(), v.Minor(), v.Patch(), v.Revision()
 	switch {
 	case r > 0:
@@ -144,46 +144,46 @@ func (v *Compact64) AppendBytes(dst []byte) []byte {
 	return dst
 }
 
-func (v *Compact64) Bytes() (r []byte) {
+func (v *Version64) Bytes() (r []byte) {
 	var buf [24]byte
 	r = v.AppendBytes(buf[:])
 	return
 }
 
-func (v *Compact64) String() string {
+func (v *Version64) String() string {
 	return byteconv.B2S(v.Bytes())
 }
 
-func (v *Compact64) WriteTo(w io.Writer) (int64, error) {
+func (v *Version64) WriteTo(w io.Writer) (int64, error) {
 	n, err := w.Write(v.Bytes())
 	return int64(n), err
 }
 
-func (v *Compact64) WriteBinaryTo(w io.Writer) (int64, error) {
+func (v *Version64) WriteBinaryTo(w io.Writer) (int64, error) {
 	p, _ := v.MarshalBinary()
 	n, err := w.Write(p)
 	return int64(n), err
 }
 
-func (v *Compact64) MarshalBinary() ([]byte, error) {
+func (v *Version64) MarshalBinary() ([]byte, error) {
 	var buf [8]byte
 	binary.LittleEndian.PutUint64(buf[:], uint64(*v))
 	return buf[:], nil
 }
 
-func (v *Compact64) MarshalText() ([]byte, error) {
+func (v *Version64) MarshalText() ([]byte, error) {
 	return v.Bytes(), nil
 }
 
-func (v *Compact64) UnmarshalBinary(bin []byte) error {
+func (v *Version64) UnmarshalBinary(bin []byte) error {
 	if len(bin) < 8 {
 		return ErrBinLen8
 	}
-	*v = Compact64(binary.LittleEndian.Uint64(bin))
+	*v = Version64(binary.LittleEndian.Uint64(bin))
 	return nil
 }
 
-func (v *Compact64) UnmarshalText(p []byte) error {
+func (v *Version64) UnmarshalText(p []byte) error {
 	return v.Parse(p)
 }
 
