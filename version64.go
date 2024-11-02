@@ -12,13 +12,13 @@ import (
 // Version64 represents simple version based on uint64 type.
 type Version64 uint64
 
-// ParseCompact64 makes new version from source.
-func ParseCompact64(ver []byte) (Version64, error) {
-	return ParseCompact64String(byteconv.B2S(ver))
+// ParseVersion64 makes new version from source.
+func ParseVersion64(ver []byte) (Version64, error) {
+	return ParseVersion64String(byteconv.B2S(ver))
 }
 
-// ParseCompact64String makes new version from source string.
-func ParseCompact64String(ver string) (v Version64, err error) {
+// ParseVersion64String makes new version from source string.
+func ParseVersion64String(ver string) (v Version64, err error) {
 	err = v.ParseString(ver)
 	return
 }
@@ -146,7 +146,7 @@ func (v *Version64) AppendBytes(dst []byte) []byte {
 
 func (v *Version64) Bytes() (r []byte) {
 	var buf [24]byte
-	r = v.AppendBytes(buf[:])
+	r = v.AppendBytes(buf[:0])
 	return
 }
 
@@ -187,4 +187,4 @@ func (v *Version64) UnmarshalText(p []byte) error {
 	return v.Parse(p)
 }
 
-var _, _ = ParseCompact64, NewCompact64
+var _, _ = ParseVersion64, NewCompact64

@@ -17,10 +17,10 @@ var tcs64 = []tc64{
 	{"5.12.134", 5, 12, 134, 0},
 }
 
-func TestCompact64Parse(t *testing.T) {
+func TestVersion64Parse(t *testing.T) {
 	for _, c := range tcs64 {
 		t.Run(c.raw, func(t *testing.T) {
-			ver, err := ParseCompact64String(c.raw)
+			ver, err := ParseVersion64String(c.raw)
 			if err != nil && err != ErrEmpty {
 				t.Error(err)
 			}
@@ -31,7 +31,7 @@ func TestCompact64Parse(t *testing.T) {
 	}
 }
 
-func TestCompact64Marshal(t *testing.T) {
+func TestVersion64Marshal(t *testing.T) {
 	for _, c := range tcs64 {
 		if len(c.raw) < 3 {
 			continue
@@ -51,18 +51,18 @@ func TestCompact64Marshal(t *testing.T) {
 	}
 }
 
-func BenchmarkCompact64Parse(b *testing.B) {
+func BenchmarkVersion64Parse(b *testing.B) {
 	for _, c := range tcs64 {
 		b.Run(c.raw, func(b *testing.B) {
 			b.ReportAllocs()
 			for i := 0; i < b.N; i++ {
-				_, _ = ParseCompact64String(c.raw)
+				_, _ = ParseVersion64String(c.raw)
 			}
 		})
 	}
 }
 
-func BenchmarkCompact64Marshal(b *testing.B) {
+func BenchmarkVersion64Marshal(b *testing.B) {
 	for _, c := range tcs64 {
 		if len(c.raw) < 3 {
 			continue

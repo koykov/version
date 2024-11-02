@@ -12,13 +12,13 @@ import (
 // Version32 represents simple version based on uint32 type.
 type Version32 uint32
 
-// ParseCompact32 makes new version from source.
-func ParseCompact32(ver []byte) (Version32, error) {
-	return ParseCompact32String(byteconv.B2S(ver))
+// ParseVersion32 makes new version from source.
+func ParseVersion32(ver []byte) (Version32, error) {
+	return ParseVersion32String(byteconv.B2S(ver))
 }
 
-// ParseCompact32String makes new version from source string.
-func ParseCompact32String(ver string) (v Version32, err error) {
+// ParseVersion32String makes new version from source string.
+func ParseVersion32String(ver string) (v Version32, err error) {
 	err = v.ParseString(ver)
 	return
 }
@@ -146,7 +146,7 @@ func (v *Version32) AppendBytes(dst []byte) []byte {
 
 func (v *Version32) Bytes() (r []byte) {
 	var buf [24]byte
-	r = v.AppendBytes(buf[:])
+	r = v.AppendBytes(buf[:0])
 	return
 }
 
@@ -187,4 +187,4 @@ func (v *Version32) UnmarshalText(p []byte) error {
 	return v.Parse(p)
 }
 
-var _, _ = ParseCompact32, NewCompact32
+var _, _ = ParseVersion32, NewCompact32
