@@ -9,6 +9,7 @@ import (
 	"github.com/koykov/byteconv"
 )
 
+// Compact64 represents simple version based on uint64 type.
 type Compact64 uint64
 
 // ParseCompact64 makes new version from source.
