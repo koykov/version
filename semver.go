@@ -194,3 +194,9 @@ func (v *Semver) WriteTo(w io.Writer) (int64, error) {
 	n, err := w.Write(v.Bytes())
 	return int64(n), err
 }
+
+func (v *Semver) WriteBinaryTo(w io.Writer) (int64, error) {
+	p, _ := v.MarshalBinary()
+	n, err := w.Write(p)
+	return int64(n), err
+}
