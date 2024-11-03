@@ -1,6 +1,7 @@
 package version
 
 import (
+	"encoding/binary"
 	"io"
 	"strconv"
 
@@ -94,6 +95,63 @@ func (v *Semver) Meta() []byte {
 
 func (v *Semver) MetaString() string {
 	return byteconv.B2S(v.meta)
+}
+
+func (v *Semver) MarshalBinary() (data []byte, err error) {
+	var a [128]byte
+	buf := a[:]
+	binary.LittleEndian.PutUint32(buf[:4], v.m)
+	binary.LittleEndian.PutUint32(buf[4:], v.n)
+	binary.LittleEndian.PutUint32(buf[8:], v.p)
+	binary.LittleEndian.PutUint32(buf[12:], uint32(len(v.pr)))
+	buf = append(buf, v.pr...)
+	binary.LittleEndian.PutUint32(buf[len(buf)-1:], uint32(len(v.meta)))
+	buf = append(buf, v.meta...)
+	return buf, nil
+}
+
+func (v *Semver) UnmarshalBinary(data []byte) error {
+	if len(data) < 4 {
+		return io.ErrUnexpectedEOF
+	}
+	v.m = binary.LittleEndian.Uint32(data[0:4])
+	data = data[4:]
+
+	if len(data) < 4 {
+		return io.ErrUnexpectedEOF
+	}
+	v.n = binary.LittleEndian.Uint32(data[0:4])
+	data = data[4:]
+
+	if len(data) < 4 {
+		return io.ErrUnexpectedEOF
+	}
+	v.p = binary.LittleEndian.Uint32(data[0:4])
+	data = data[4:]
+
+	if len(data) < 4 {
+		return io.ErrUnexpectedEOF
+	}
+	prl := binary.LittleEndian.Uint32(data[0:4])
+	data = data[4:]
+	if len(data) < int(prl) {
+		return io.ErrUnexpectedEOF
+	}
+	v.pr = data[:prl]
+	data = data[prl:]
+
+	if len(data) < 4 {
+		return io.ErrUnexpectedEOF
+	}
+	ml := binary.LittleEndian.Uint32(data[0:4])
+	data = data[4:]
+	if len(data) < int(prl) {
+		return io.ErrUnexpectedEOF
+	}
+	v.meta = data[:ml]
+	data = data[ml:]
+
+	return nil
 }
 
 func (v *Semver) AppendBytes(dst []byte) []byte {
