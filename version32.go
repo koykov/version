@@ -159,10 +159,10 @@ func (v *Version32) WriteTo(w io.Writer) (int64, error) {
 	return int64(n), err
 }
 
-func (v *Version32) WriteBinaryTo(w io.Writer) (int32, error) {
+func (v *Version32) WriteBinaryTo(w io.Writer) (int64, error) {
 	p, _ := v.MarshalBinary()
 	n, err := w.Write(p)
-	return int32(n), err
+	return int64(n), err
 }
 
 func (v *Version32) MarshalBinary() ([]byte, error) {
