@@ -173,6 +173,14 @@ func (v *Semver) AppendBytes(dst []byte) []byte {
 	return dst
 }
 
+func (v *Semver) MarshalText() (text []byte, err error) {
+	return v.Bytes(), nil
+}
+
+func (v *Semver) UnmarshalText(text []byte) error {
+	return v.Parse(text)
+}
+
 func (v *Semver) Bytes() []byte {
 	var buf [128]byte
 	return v.AppendBytes(buf[:0])
