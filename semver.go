@@ -2,6 +2,7 @@ package version
 
 import (
 	"encoding/binary"
+	"errors"
 	"io"
 	"strconv"
 
@@ -29,8 +30,54 @@ func (v *Semver) Parse(ver []byte) error {
 }
 
 func (v *Semver) ParseString(ver string) error {
-	_ = ver
-	// todo implement me
+	n := len(ver)
+	if n == 0 {
+		return ErrSemverEmpty
+	}
+	_ = ver[n-1]
+	var offset, part int
+
+	for ; ver[offset] == ' ' || ver[offset] == 'v'; offset++ {
+	}
+	for i := n - 1; i > offset && ver[i] == ' '; i-- {
+	}
+
+	var i int
+	for i = offset; i < n; i++ {
+		if ver[i] == '.' {
+			x, err := strconv.ParseUint(ver[offset:i], 10, 32)
+			if err != nil {
+				return err
+			}
+			switch part {
+			case 0:
+				v.m = uint32(x)
+				part = 1
+			case 1:
+				v.n = uint32(x)
+				part = 2
+			case 2:
+				v.p = uint32(x)
+				part = 3
+			}
+			offset = i + 1
+		}
+	}
+
+	if n-offset > 0 && part < 3 {
+		x, err := strconv.ParseUint(ver[offset:i], 10, 32)
+		if err != nil {
+			return err
+		}
+		switch part {
+		case 1:
+			v.n = uint32(x)
+			part = 2
+		case 2:
+			v.p = uint32(x)
+			part = 3
+		}
+	}
 	return nil
 }
 
@@ -200,3 +247,8 @@ func (v *Semver) WriteBinaryTo(w io.Writer) (int64, error) {
 	n, err := w.Write(p)
 	return int64(n), err
 }
+
+var (
+	bSpace         = []byte(" ")
+	ErrSemverEmpty = errors.New("version is empty")
+)
