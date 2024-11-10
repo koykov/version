@@ -39,7 +39,7 @@ func (v *Semver) ParseString(ver string) error {
 
 	for ; ver[offset] == ' ' || ver[offset] == 'v'; offset++ {
 	}
-	for i := n - 1; i > offset && ver[i] == ' '; i-- {
+	for ; n > offset && ver[n-1] == ' '; n-- {
 	}
 
 	var i int
@@ -72,10 +72,8 @@ func (v *Semver) ParseString(ver string) error {
 		switch part {
 		case 1:
 			v.n = uint32(x)
-			part = 2
 		case 2:
 			v.p = uint32(x)
-			part = 3
 		}
 	}
 	return nil
