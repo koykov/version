@@ -30,9 +30,17 @@ func (v *Semver) Parse(ver []byte) error {
 }
 
 func (v *Semver) ParseString(ver string) error {
+	const (
+		stepMajor = iota
+		stepMinor
+		stepPatch
+		stepPreRelease
+		stepMeta
+	)
+
 	n := len(ver)
 	if n == 0 {
-		return ErrSemverEmpty
+		return ErrEmptySemver
 	}
 	_ = ver[n-1]
 	var offset, part int
@@ -50,30 +58,34 @@ func (v *Semver) ParseString(ver string) error {
 				return err
 			}
 			switch part {
-			case 0:
+			case stepMajor:
 				v.m = uint32(x)
-				part = 1
-			case 1:
+				part = stepMinor
+			case stepMinor:
 				v.n = uint32(x)
-				part = 2
-			case 2:
+				part = stepPatch
+			case stepPatch:
 				v.p = uint32(x)
-				part = 3
+				part = stepPreRelease
+			default:
+				return ErrBadSemver
 			}
 			offset = i + 1
 		}
 	}
 
-	if n-offset > 0 && part < 3 {
+	if n-offset > 0 && part < stepPreRelease {
 		x, err := strconv.ParseUint(ver[offset:i], 10, 32)
 		if err != nil {
 			return err
 		}
 		switch part {
-		case 1:
+		case stepMinor:
 			v.n = uint32(x)
-		case 2:
+		case stepMajor:
 			v.p = uint32(x)
+		default:
+			return ErrBadSemver
 		}
 	}
 	return nil
@@ -247,6 +259,6 @@ func (v *Semver) WriteBinaryTo(w io.Writer) (int64, error) {
 }
 
 var (
-	bSpace         = []byte(" ")
-	ErrSemverEmpty = errors.New("version is empty")
+	ErrEmptySemver = errors.New("version is empty")
+	ErrBadSemver   = errors.New("wrong semver format")
 )
