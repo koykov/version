@@ -184,21 +184,7 @@ func (v *Semver) UnmarshalBinary(data []byte) error {
 }
 
 func (v *Semver) AppendBytes(dst []byte) []byte {
-	dst = strconv.AppendUint(dst, uint64(v.m), 10)
-	dst = append(dst, '.')
-	dst = strconv.AppendUint(dst, uint64(v.n), 10)
-	if v.p > 0 || len(v.pr) > 0 || len(v.meta) > 0 {
-		dst = append(dst, '.')
-		dst = strconv.AppendUint(dst, uint64(v.p), 10)
-	}
-	if len(v.pr) > 0 {
-		dst = append(dst, '-')
-		dst = append(dst, v.pr...)
-	}
-	if len(v.meta) > 0 {
-		dst = append(dst, '+')
-		dst = append(dst, v.meta...)
-	}
+	// todo implement me
 	return dst
 }
 
