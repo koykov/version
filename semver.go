@@ -11,7 +11,7 @@ import (
 
 type Semver struct {
 	m, n, p  uint32
-	pr, meta []byte
+	pr, meta string
 }
 
 // ParseSemver makes new version from source.
@@ -31,11 +31,11 @@ func (v *Semver) Parse(ver []byte) error {
 
 func (v *Semver) ParseString(ver string) error {
 	const (
-		stepMajor = iota
-		stepMinor
-		stepPatch
-		stepPreRelease
-		stepMeta
+		partMajor = iota
+		partMinor
+		partPatch
+		partPreRelease
+		partMeta
 	)
 
 	n := len(ver)
@@ -58,35 +58,46 @@ func (v *Semver) ParseString(ver string) error {
 				return err
 			}
 			switch part {
-			case stepMajor:
+			case partMajor:
 				v.m = uint32(x)
-				part = stepMinor
-			case stepMinor:
+				part = partMinor
+			case partMinor:
 				v.n = uint32(x)
-				part = stepPatch
-			case stepPatch:
-				v.p = uint32(x)
-				part = stepPreRelease
+				part = partPatch
 			default:
 				return ErrBadSemver
 			}
 			offset = i + 1
 		}
+		if ver[i] == '-' && part == partPatch {
+			x, err := strconv.ParseUint(ver[offset:i], 10, 32)
+			if err != nil {
+				return err
+			}
+			v.p = uint32(x)
+			part = partPreRelease
+		}
+		if ver[i] == '+' && part == partPreRelease {
+			v.pr = ver[offset:i]
+			part = partMeta
+		}
 	}
 
-	if n-offset > 0 && part < stepPreRelease {
+	switch {
+	case n-offset > 0 && part < partPreRelease:
 		x, err := strconv.ParseUint(ver[offset:i], 10, 32)
 		if err != nil {
 			return err
 		}
 		switch part {
-		case stepMinor:
+		case partMinor:
 			v.n = uint32(x)
-		case stepMajor:
+		case partMajor:
 			v.p = uint32(x)
 		default:
 			return ErrBadSemver
 		}
+	case n-offset > 0 && part == partPreRelease:
 	}
 	return nil
 }
@@ -107,22 +118,22 @@ func (v *Semver) SetPatch(value uint32) *Semver {
 }
 
 func (v *Semver) SetPreRelease(value []byte) *Semver {
-	v.pr = value
+	v.pr = byteconv.B2S(value)
 	return v
 }
 
 func (v *Semver) SetPreReleaseString(value string) *Semver {
-	v.pr = byteconv.S2B(value)
+	v.pr = value
 	return v
 }
 
 func (v *Semver) SetMeta(value []byte) *Semver {
-	v.meta = value
+	v.meta = byteconv.B2S(value)
 	return v
 }
 
 func (v *Semver) SetMetaString(value string) *Semver {
-	v.meta = byteconv.S2B(value)
+	v.meta = value
 	return v
 }
 
@@ -139,19 +150,19 @@ func (v *Semver) Patch() uint32 {
 }
 
 func (v *Semver) PreRelease() []byte {
-	return v.pr
+	return byteconv.S2B(v.pr)
 }
 
 func (v *Semver) PreReleaseString() string {
-	return byteconv.B2S(v.pr)
+	return v.pr
 }
 
 func (v *Semver) Meta() []byte {
-	return v.meta
+	return byteconv.S2B(v.meta)
 }
 
 func (v *Semver) MetaString() string {
-	return byteconv.B2S(v.meta)
+	return v.meta
 }
 
 func (v *Semver) MarshalBinary() (data []byte, err error) {
@@ -168,46 +179,7 @@ func (v *Semver) MarshalBinary() (data []byte, err error) {
 }
 
 func (v *Semver) UnmarshalBinary(data []byte) error {
-	if len(data) < 4 {
-		return io.ErrUnexpectedEOF
-	}
-	v.m = binary.LittleEndian.Uint32(data[0:4])
-	data = data[4:]
-
-	if len(data) < 4 {
-		return io.ErrUnexpectedEOF
-	}
-	v.n = binary.LittleEndian.Uint32(data[0:4])
-	data = data[4:]
-
-	if len(data) < 4 {
-		return io.ErrUnexpectedEOF
-	}
-	v.p = binary.LittleEndian.Uint32(data[0:4])
-	data = data[4:]
-
-	if len(data) < 4 {
-		return io.ErrUnexpectedEOF
-	}
-	prl := binary.LittleEndian.Uint32(data[0:4])
-	data = data[4:]
-	if len(data) < int(prl) {
-		return io.ErrUnexpectedEOF
-	}
-	v.pr = data[:prl]
-	data = data[prl:]
-
-	if len(data) < 4 {
-		return io.ErrUnexpectedEOF
-	}
-	ml := binary.LittleEndian.Uint32(data[0:4])
-	data = data[4:]
-	if len(data) < int(prl) {
-		return io.ErrUnexpectedEOF
-	}
-	v.meta = data[:ml]
-	data = data[ml:]
-
+	// todo implement me
 	return nil
 }
 
