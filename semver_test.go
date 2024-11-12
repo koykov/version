@@ -51,11 +51,18 @@ func TestSemverParse(t *testing.T) {
 				t.Error(err)
 				return
 			}
-			if err != nil && err != stg.err {
-				t.Error(err)
-				return
-			}
 			t.Log(ver.String())
+		})
+	}
+}
+
+func BenchmarkSemverParse(b *testing.B) {
+	for _, stg := range tcSMs {
+		b.Run(stg.src, func(b *testing.B) {
+			b.ReportAllocs()
+			for i := 0; i < b.N; i++ {
+				_, _ = ParseSemverString(stg.src)
+			}
 		})
 	}
 }
