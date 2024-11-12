@@ -9,7 +9,7 @@ type tcSV struct {
 }
 
 var tcSMs = []tcSV{
-	{src: "     v1.0", m: 1},
+	{src: "     v1.0.0", m: 1},
 	{src: "     4.3.45    ", m: 4, n: 3, p: 45},
 	{src: "1.2.3"},
 	{src: "1.2.3-alpha.01"},
@@ -30,9 +30,9 @@ var tcSMs = []tcSV{
 	{src: "\n1.2", err: ErrBadSemver},
 	{src: "\nv1.2", err: ErrBadSemver},
 	{src: "1.2.0-x.Y.0+metadata"},
-	{src: "v1.2.0-x.Y.0+metadata", err: ErrBadSemver},
+	{src: "v1.2.0-x.Y.0+metadata"},
 	{src: "1.2.0-x.Y.0+metadata-width-hypen"},
-	{src: "v1.2.0-x.Y.0+metadata-width-hypen", err: ErrBadSemver},
+	{src: "v1.2.0-x.Y.0+metadata-width-hypen"},
 	{src: "1.2.3-rc1-with-hypen"},
 	{src: "v1.2.3-rc1-with-hypen", err: ErrBadSemver},
 	{src: "1.2.3.4", err: ErrBadSemver},
@@ -47,7 +47,11 @@ func TestSemverParse(t *testing.T) {
 		t.Run(stg.src, func(t *testing.T) {
 			var ver Semver
 			err := ver.ParseString(stg.src)
-			if err != nil {
+			if err != nil && stg.err == nil {
+				t.Error(err)
+				return
+			}
+			if err != nil && err != stg.err {
 				t.Error(err)
 				return
 			}

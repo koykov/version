@@ -88,7 +88,7 @@ func (v *Semver) ParseString(ver string) error {
 			}
 			offset = i + 1
 		}
-		if ver[i] == '-' {
+		if part == partPatch && ver[i] == '-' {
 			x, err := strconv.ParseUint(ver[offset:i], 10, 32)
 			if err != nil {
 				return err
@@ -98,7 +98,7 @@ func (v *Semver) ParseString(ver string) error {
 			offset = i + 1
 			break
 		}
-		if ver[i] == '+' {
+		if part == partPatch && ver[i] == '+' {
 			x, err := strconv.ParseUint(ver[offset:i], 10, 32)
 			if err != nil {
 				return err
