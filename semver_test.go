@@ -9,16 +9,8 @@ type tcSV struct {
 }
 
 var tcSMs = []tcSV{
-	{
-		src: "     v1.0",
-		m:   1,
-	},
-	{
-		src: "     4.3.45    ",
-		m:   4,
-		n:   3,
-		p:   45,
-	},
+	{src: "     v1.0", m: 1},
+	{src: "     4.3.45    ", m: 4, n: 3, p: 45},
 	{src: "1.2.3"},
 	{src: "1.2.3-alpha.01", err: ErrBadSemver},
 	{src: "1.2.3+test.01"},

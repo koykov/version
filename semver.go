@@ -10,8 +10,8 @@ import (
 )
 
 type Semver struct {
-	m, n, p  uint32
-	pr, meta string
+	m, n, p   uint64
+	pre, meta string
 }
 
 // ParseSemver makes new version from source.
@@ -59,10 +59,10 @@ func (v *Semver) ParseString(ver string) error {
 			}
 			switch part {
 			case partMajor:
-				v.m = uint32(x)
+				v.m = x
 				part = partMinor
 			case partMinor:
-				v.n = uint32(x)
+				v.n = x
 				part = partPatch
 			default:
 				return ErrBadSemver
@@ -74,11 +74,11 @@ func (v *Semver) ParseString(ver string) error {
 			if err != nil {
 				return err
 			}
-			v.p = uint32(x)
+			v.p = x
 			part = partPreRelease
 		}
 		if ver[i] == '+' && part == partPreRelease {
-			v.pr = ver[offset:i]
+			v.pre = ver[offset:i]
 			part = partMeta
 		}
 	}
@@ -91,9 +91,9 @@ func (v *Semver) ParseString(ver string) error {
 		}
 		switch part {
 		case partMinor:
-			v.n = uint32(x)
+			v.n = x
 		case partMajor:
-			v.p = uint32(x)
+			v.p = x
 		default:
 			return ErrBadSemver
 		}
@@ -102,28 +102,28 @@ func (v *Semver) ParseString(ver string) error {
 	return nil
 }
 
-func (v *Semver) SetMajor(value uint32) *Semver {
+func (v *Semver) SetMajor(value uint64) *Semver {
 	v.m = value
 	return v
 }
 
-func (v *Semver) SetMinor(value uint32) *Semver {
+func (v *Semver) SetMinor(value uint64) *Semver {
 	v.n = value
 	return v
 }
 
-func (v *Semver) SetPatch(value uint32) *Semver {
+func (v *Semver) SetPatch(value uint64) *Semver {
 	v.p = value
 	return v
 }
 
 func (v *Semver) SetPreRelease(value []byte) *Semver {
-	v.pr = byteconv.B2S(value)
+	v.pre = byteconv.B2S(value)
 	return v
 }
 
 func (v *Semver) SetPreReleaseString(value string) *Semver {
-	v.pr = value
+	v.pre = value
 	return v
 }
 
@@ -137,24 +137,24 @@ func (v *Semver) SetMetaString(value string) *Semver {
 	return v
 }
 
-func (v *Semver) Major() uint32 {
+func (v *Semver) Major() uint64 {
 	return v.m
 }
 
-func (v *Semver) Minor() uint32 {
+func (v *Semver) Minor() uint64 {
 	return v.n
 }
 
-func (v *Semver) Patch() uint32 {
+func (v *Semver) Patch() uint64 {
 	return v.p
 }
 
 func (v *Semver) PreRelease() []byte {
-	return byteconv.S2B(v.pr)
+	return byteconv.S2B(v.pre)
 }
 
 func (v *Semver) PreReleaseString() string {
-	return v.pr
+	return v.pre
 }
 
 func (v *Semver) Meta() []byte {
@@ -166,13 +166,12 @@ func (v *Semver) MetaString() string {
 }
 
 func (v *Semver) MarshalBinary() (data []byte, err error) {
-	var a [128]byte
-	buf := a[:]
-	binary.LittleEndian.PutUint32(buf[:4], v.m)
-	binary.LittleEndian.PutUint32(buf[4:], v.n)
-	binary.LittleEndian.PutUint32(buf[8:], v.p)
-	binary.LittleEndian.PutUint32(buf[12:], uint32(len(v.pr)))
-	buf = append(buf, v.pr...)
+	buf := make([]byte, len(v.pre)+len(v.meta)+32) // 32 == uint32(len(pre)) + uint32(len(meta)) + v.m + v.n + v.p
+	binary.LittleEndian.PutUint64(buf[:8], v.m)
+	binary.LittleEndian.PutUint64(buf[8:], v.n)
+	binary.LittleEndian.PutUint64(buf[16:], v.p)
+	binary.LittleEndian.PutUint32(buf[24:], uint32(len(v.pre)))
+	buf = append(buf[:28], v.pre...)
 	binary.LittleEndian.PutUint32(buf[len(buf)-1:], uint32(len(v.meta)))
 	buf = append(buf, v.meta...)
 	return buf, nil
