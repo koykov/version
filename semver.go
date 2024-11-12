@@ -25,6 +25,24 @@ func ParseSemverString(ver string) (v Semver, err error) {
 	return
 }
 
+func NewSemver(major, minor, patch uint64) *Semver {
+	return &Semver{
+		m: major,
+		n: minor,
+		p: patch,
+	}
+}
+
+func (v *Semver) WithPreRelease(pre string) *Semver {
+	v.pre = pre
+	return v
+}
+
+func (v *Semver) WithMeta(meta string) *Semver {
+	v.meta = meta
+	return v
+}
+
 func (v *Semver) Parse(ver []byte) error {
 	return v.ParseString(byteconv.B2S(ver))
 }
