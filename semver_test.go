@@ -12,10 +12,10 @@ var tcSMs = []tcSV{
 	{src: "     v1.0", m: 1},
 	{src: "     4.3.45    ", m: 4, n: 3, p: 45},
 	{src: "1.2.3"},
-	{src: "1.2.3-alpha.01", err: ErrBadSemver},
+	{src: "1.2.3-alpha.01"},
 	{src: "1.2.3+test.01"},
 	{src: "1.2.3-alpha.-1"},
-	{src: "v1.2.3", err: ErrBadSemver},
+	{src: "v1.2.3"},
 	{src: "1.0", err: ErrBadSemver},
 	{src: "v1.0", err: ErrBadSemver},
 	{src: "1", err: ErrBadSemver},
@@ -46,7 +46,12 @@ func TestSemverParse(t *testing.T) {
 	for _, stg := range tcSMs {
 		t.Run(stg.src, func(t *testing.T) {
 			var ver Semver
-			_ = ver.ParseString(stg.src)
+			err := ver.ParseString(stg.src)
+			if err != nil {
+				t.Error(err)
+				return
+			}
+			t.Log(ver.String())
 		})
 	}
 }

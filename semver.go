@@ -5,6 +5,7 @@ import (
 	"errors"
 	"io"
 	"strconv"
+	"strings"
 
 	"github.com/koykov/byteconv"
 )
@@ -87,36 +88,48 @@ func (v *Semver) ParseString(ver string) error {
 			}
 			offset = i + 1
 		}
-		if ver[i] == '-' && part == partPatch {
+		if ver[i] == '-' {
 			x, err := strconv.ParseUint(ver[offset:i], 10, 32)
 			if err != nil {
 				return err
 			}
 			v.p = x
 			part = partPreRelease
+			offset = i + 1
+			break
 		}
-		if ver[i] == '+' && part == partPreRelease {
-			v.pre = ver[offset:i]
+		if ver[i] == '+' {
+			x, err := strconv.ParseUint(ver[offset:i], 10, 32)
+			if err != nil {
+				return err
+			}
+			v.p = x
 			part = partMeta
+			offset = i + 1
+			break
 		}
 	}
 
-	switch {
-	case n-offset > 0 && part < partPreRelease:
-		x, err := strconv.ParseUint(ver[offset:i], 10, 32)
+	switch part {
+	case partPatch:
+		x, err := strconv.ParseUint(ver[offset:n], 10, 32)
 		if err != nil {
 			return err
 		}
-		switch part {
-		case partMinor:
-			v.n = x
-		case partMajor:
-			v.p = x
-		default:
-			return ErrBadSemver
+		v.p = x
+	case partPreRelease:
+		v.pre = ver[offset:]
+		if i = strings.IndexByte(ver[offset:], '+'); i != -1 {
+			v.pre = ver[offset : offset+i]
+			v.meta = ver[offset+i+1:]
+			return nil
 		}
-	case n-offset > 0 && part == partPreRelease:
+	case partMeta:
+		v.meta = ver[offset:]
+	default:
+		return ErrBadSemver
 	}
+
 	return nil
 }
 
@@ -201,7 +214,19 @@ func (v *Semver) UnmarshalBinary(data []byte) error {
 }
 
 func (v *Semver) AppendBytes(dst []byte) []byte {
-	// todo implement me
+	dst = strconv.AppendUint(dst, v.m, 10)
+	dst = append(dst, '.')
+	dst = strconv.AppendUint(dst, v.n, 10)
+	dst = append(dst, '.')
+	dst = strconv.AppendUint(dst, v.p, 10)
+	if len(v.pre) > 0 {
+		dst = append(dst, '-')
+		dst = append(dst, v.pre...)
+	}
+	if len(v.meta) > 0 {
+		dst = append(dst, '+')
+		dst = append(dst, v.meta...)
+	}
 	return dst
 }
 
