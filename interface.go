@@ -18,4 +18,5 @@ type Version interface {
 	WriteBinaryTo(w io.Writer) (int64, error)
 	Bytes() []byte
 	AppendBytes(dst []byte) []byte
+	Reset()
 }

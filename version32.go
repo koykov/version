@@ -187,4 +187,6 @@ func (v *Version32) UnmarshalText(p []byte) error {
 	return v.Parse(p)
 }
 
+func (v *Version32) Reset() { *v = 0 }
+
 var _, _ = ParseVersion32, NewCompact32

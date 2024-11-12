@@ -187,4 +187,6 @@ func (v *Version64) UnmarshalText(p []byte) error {
 	return v.Parse(p)
 }
 
+func (v *Version64) Reset() { *v = 0 }
+
 var _, _ = ParseVersion64, NewCompact64
