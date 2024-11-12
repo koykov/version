@@ -26,22 +26,14 @@ func ParseSemverString(ver string) (v Semver, err error) {
 	return
 }
 
-func NewSemver(major, minor, patch uint64) *Semver {
+func NewSemver(major, minor, patch uint64, pre, meta string) *Semver {
 	return &Semver{
-		m: major,
-		n: minor,
-		p: patch,
+		m:    major,
+		n:    minor,
+		p:    patch,
+		pre:  pre,
+		meta: meta,
 	}
-}
-
-func (v *Semver) WithPreRelease(pre string) *Semver {
-	v.pre = pre
-	return v
-}
-
-func (v *Semver) WithMeta(meta string) *Semver {
-	v.meta = meta
-	return v
 }
 
 func (v *Semver) Parse(ver []byte) error {
@@ -203,6 +195,7 @@ func (v *Semver) MarshalBinary() (data []byte, err error) {
 	binary.LittleEndian.PutUint64(buf[16:], v.p)
 	binary.LittleEndian.PutUint32(buf[24:], uint32(len(v.pre)))
 	buf = append(buf[:28], v.pre...)
+	buf = buf[:len(buf)+4]
 	binary.LittleEndian.PutUint32(buf[len(buf)-1:], uint32(len(v.meta)))
 	buf = append(buf, v.meta...)
 	return buf, nil
