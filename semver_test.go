@@ -60,10 +60,10 @@ func TestSemverParse(t *testing.T) {
 
 func TestSemverMarshal(t *testing.T) {
 	for _, stg := range tcSMs {
+		if stg.err != nil {
+			return
+		}
 		t.Run(stg.src, func(t *testing.T) {
-			if stg.err != nil {
-				return
-			}
 			ver := NewSemver(stg.m, stg.n, stg.p, stg.pre, stg.meta)
 			s := ver.String()
 			if i := strings.Index(stg.src, s); i == -1 {
@@ -79,6 +79,22 @@ func BenchmarkSemverParse(b *testing.B) {
 			b.ReportAllocs()
 			for i := 0; i < b.N; i++ {
 				_, _ = ParseSemverString(stg.src)
+			}
+		})
+	}
+}
+
+func BenchmarkSemverMarshal(b *testing.B) {
+	for _, stg := range tcSMs {
+		if stg.err != nil {
+			return
+		}
+		var buf []byte
+		b.Run(stg.src, func(b *testing.B) {
+			b.ReportAllocs()
+			for i := 0; i < b.N; i++ {
+				ver := NewSemver(stg.m, stg.n, stg.p, stg.pre, stg.meta)
+				buf = ver.AppendBytes(buf[:0])
 			}
 		})
 	}
