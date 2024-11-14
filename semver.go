@@ -202,7 +202,31 @@ func (v *Semver) MarshalBinary() ([]byte, error) {
 }
 
 func (v *Semver) UnmarshalBinary(data []byte) error {
-	// todo implement me
+	if len(data) < 24 {
+		return ErrShort
+	}
+	v.m = binary.LittleEndian.Uint64(data[:8])
+	v.n = binary.LittleEndian.Uint64(data[8:16])
+	v.p = binary.LittleEndian.Uint64(data[16:24])
+
+	var l uint32
+
+	if data = data[24:]; len(data) > 0 && len(data) < 4 {
+		return ErrShort
+	}
+	if l = binary.LittleEndian.Uint32(data[:4]); l > uint32(len(data[4:])) {
+		return ErrShort
+	}
+	v.pre = byteconv.B2S(data[4 : l+4])
+
+	if data = data[l+4:]; len(data) > 0 && len(data) < 4 {
+		return ErrShort
+	}
+	if l = binary.LittleEndian.Uint32(data[:4]); l > uint32(len(data[4:])) {
+		return ErrShort
+	}
+	v.meta = byteconv.B2S(data[4 : l+4])
+
 	return nil
 }
 
