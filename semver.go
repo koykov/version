@@ -280,4 +280,5 @@ func (v *Semver) Reset() { v.m, v.n, v.p, v.pre, v.meta = 0, 0, 0, "", "" }
 var (
 	ErrEmptySemver = errors.New("version is empty")
 	ErrBadSemver   = errors.New("wrong semver format")
+	_              = ParseSemver
 )
