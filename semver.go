@@ -188,7 +188,7 @@ func (v *Semver) MetaString() string {
 	return v.meta
 }
 
-func (v *Semver) MarshalBinary() (data []byte, err error) {
+func (v *Semver) MarshalBinary() ([]byte, error) {
 	buf := make([]byte, len(v.pre)+len(v.meta)+32) // 32 == uint32(len(pre)) + uint32(len(meta)) + v.m + v.n + v.p
 	binary.LittleEndian.PutUint64(buf[:8], v.m)
 	binary.LittleEndian.PutUint64(buf[8:], v.n)
@@ -196,7 +196,7 @@ func (v *Semver) MarshalBinary() (data []byte, err error) {
 	binary.LittleEndian.PutUint32(buf[24:], uint32(len(v.pre)))
 	buf = append(buf[:28], v.pre...)
 	buf = buf[:len(buf)+4]
-	binary.LittleEndian.PutUint32(buf[len(buf)-1:], uint32(len(v.meta)))
+	binary.LittleEndian.PutUint32(buf[len(buf)-4:], uint32(len(v.meta)))
 	buf = append(buf, v.meta...)
 	return buf, nil
 }
